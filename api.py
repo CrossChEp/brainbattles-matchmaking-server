@@ -22,4 +22,5 @@ app.add_middleware(
 )
 
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=7000)
+    uvicorn.run(app, host='127.0.0.1', port=7000, reload=False, log_level="debug", debug=True,
+                workers=1, limit_concurrency=1, limit_max_requests=1)
