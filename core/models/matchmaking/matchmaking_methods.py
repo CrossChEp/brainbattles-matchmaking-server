@@ -1,3 +1,4 @@
+import datetime
 import json
 import random
 
@@ -18,18 +19,7 @@ def add_user_to_queue(user: UserTable, subject: str) -> None:
         raise HTTPException(status_code=403, detail='User already in queue')
     queue.append(user_queue_model.dict())
     redis.set(QUEUE, json.dumps(queue))
-    redis.expire(hours=5)
-
-
-def create_game_token() -> str:
-    alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890' \
-               '-=~`!@#$%^&*()_+:"|'
-    token_size = random.randint(0, len(alphabet))
-    token = ''
-    alphabet_list = [char for char in alphabet]
-    for i in range(token_size):
-        token += alphabet_list[random.randint(0, len(alphabet) - 1)]
-    return token
+    redis.expire(QUEUE, datetime.timedelta(hours=5))
 
 
 def create_user_queue_model(user: UserTable, subject: str) -> UserQueueModel:
