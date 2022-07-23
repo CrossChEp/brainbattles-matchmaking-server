@@ -18,6 +18,7 @@ def add_user_to_queue(user: UserTable, subject: str) -> None:
         raise HTTPException(status_code=403, detail='User already in queue')
     queue.append(user_queue_model.dict())
     redis.set(QUEUE, json.dumps(queue))
+    redis.expire(hours=5)
 
 
 def create_game_token() -> str:
