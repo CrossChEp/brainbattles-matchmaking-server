@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter
 
 from core.controllers.user_controllers import add_to_queue_controller, add_to_game_controller, leave_game_controller, \
     leave_queue_controller

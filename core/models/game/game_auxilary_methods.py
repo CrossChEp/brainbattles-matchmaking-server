@@ -2,8 +2,7 @@ import random
 
 from fastapi import HTTPException
 
-from core.configs.config import GAME, QUEUE
-from core.middlewares.redis_sessions import get_redis_table, get_redis_game_table
+from core.middlewares.redis_sessions import get_redis_game_table
 from core.models.matchmaking.matchmaking_auxilary_methods import find_task_by_subject, find_task_by_rank, \
     get_random_element
 from core.models.tasks.tasks import get_tasks
