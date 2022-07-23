@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 
 from core.controllers.user_controllers import add_to_queue_controller, add_to_game_controller
-from core.models.game.game_methods import add_user_to_game_redis_table
 
 matchmaking_router = APIRouter()
 

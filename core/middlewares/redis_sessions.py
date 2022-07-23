@@ -15,6 +15,8 @@ def get_redis_table(table_name: str):
         return r
     except TypeError:
         redis.set(table_name, json.dumps([]))
+        r = json.loads(redis.get(table_name))
+        return r
 
 
 def get_redis_game_table():
@@ -25,4 +27,6 @@ def get_redis_game_table():
         return r
     except TypeError:
         redis.set(GAME, json.dumps({}))
+        r = json.loads(redis.get(GAME))
+        return r
 
