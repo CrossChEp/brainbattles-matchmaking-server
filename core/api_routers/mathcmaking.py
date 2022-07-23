@@ -1,11 +1,11 @@
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter
 
-from core.schemas import UserMatchmakingModel
+from core.controllers.user_controllers import add_to_queue_controller
 
 matchmaking_router = APIRouter()
 
 
 @matchmaking_router.post('/api/matchmaking')
-def add_to_queue(user_token: str, user: UserMatchmakingModel):
-    pass
+def add_to_queue(token: str, subject: str):
+    add_to_queue_controller(token, subject)
+

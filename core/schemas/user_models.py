@@ -8,3 +8,12 @@ class UserMatchmakingModel(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class UserQueueModel(BaseModel):
+    id: int
+    rank: str
+    subject: str
+
+    class Config:
+        orm_mode = True
