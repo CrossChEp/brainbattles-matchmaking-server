@@ -1,3 +1,6 @@
+"""Module that contains all config variables"""
+
+
 from redis.client import Redis
 
 
