@@ -13,7 +13,7 @@ from core.store.db_model import UserTable, TaskTable
 
 def find_user_in_game_by_id(user_id: int):
     games = get_redis_game_table()
-    return games[user_id]
+    return games[str(user_id)]
 
 
 def find_user_in_game_as_opponent(user_id: int):

@@ -3,34 +3,38 @@ from datetime import datetime
 from fastapi import HTTPException
 from jose import jwt, JWTError
 from sqlalchemy.orm import Session
-from starlette.status import HTTP_401_UNAUTHORIZED
 
 from core.configs.config import SECRET_KEY, ALGORITHM, BANNED
+from core.exceptions.exceptions import credentials_exception
 from core.models.users.users_methods import get_user_by_id, unban_user
 from core.schemas.token_models import TokenData
 from core.store.db_model import UserTable
 
 
 def get_current_user(session: Session, token: str):
-    credentials_exception = HTTPException(
-        status_code=HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        uid: int = payload.get('id')
-        if uid is None:
-            raise credentials_exception
-        token_data = TokenData(id=uid)
-    except JWTError:
-        raise credentials_exception
-
+    token_data = get_token_data(token)
     user = get_user_by_id(user_id=token_data.id, session=session)
     if user is None:
         raise credentials_exception
     check_ban_data(user, session)
     return user
+
+
+def get_token_data(token: str):
+    try:
+        token_data = decode_jwt(token)
+    except JWTError:
+        raise credentials_exception
+    return token_data
+
+
+def decode_jwt(token: str):
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    uid: int = payload.get('id')
+    if uid is None:
+        raise credentials_exception
+    token_data = TokenData(id=uid)
+    return token_data
 
 
 def is_user_banned(user: UserTable) -> bool:

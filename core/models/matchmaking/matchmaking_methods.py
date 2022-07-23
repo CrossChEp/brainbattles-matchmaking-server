@@ -1,12 +1,11 @@
 import datetime
 import json
-import random
 
 from fastapi import HTTPException
-from sqlalchemy.orm import Session
 
 from core.configs.config import redis, QUEUE
 from core.middlewares.redis_sessions import get_redis_table
+from core.models.matchmaking.matchmaking_auxilary_methods import find_user_in_queue_by_id
 from core.schemas.user_models import UserQueueModel
 from core.store.db_model import UserTable
 
@@ -29,3 +28,10 @@ def create_user_queue_model(user: UserTable, subject: str) -> UserQueueModel:
         subject=subject
     )
     return user_queue_model
+
+
+def leave_the_queue(user: UserTable):
+    queue = get_redis_table(QUEUE)
+    user_queue = find_user_in_queue_by_id(user.id)
+    queue.remove(user_queue)
+    redis.set(QUEUE, json.dumps(queue))
