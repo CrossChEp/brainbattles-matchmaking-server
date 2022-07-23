@@ -2,6 +2,8 @@ import uvicorn
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 
+from core.api_routers.mathcmaking import matchmaking_router
+
 app = FastAPI()
 origins = [
     "http://localhost.tiangolo.com",
@@ -21,6 +23,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(matchmaking_router)
+
 if __name__ == '__main__':
-    uvicorn.run(app, host='127.0.0.1', port=7000, reload=False, log_level="debug", debug=True,
-                workers=1, limit_concurrency=1, limit_max_requests=1)
+    uvicorn.run(app, host='127.0.0.1', port=7000)
