@@ -1,3 +1,6 @@
+"""Module that contains all custom exceptions"""
+
+
 from fastapi import HTTPException
 from starlette.status import HTTP_401_UNAUTHORIZED
 

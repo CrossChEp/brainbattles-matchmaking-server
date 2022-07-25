@@ -1,3 +1,6 @@
+"""Module that contains session generator of database"""
+
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -7,6 +10,10 @@ session = sessionmaker(bind=engine)
 
 
 def generate_session():
+    """generates database session
+
+    :return: Session
+    """
     sess = session()
     try:
         yield sess
