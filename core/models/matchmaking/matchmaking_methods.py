@@ -4,9 +4,8 @@
 import datetime
 import json
 
-from fastapi import HTTPException
-
 from core.configs.config import redis, QUEUE
+from core.exceptions.exceptions import user_not_in_queue_exception, user_already_in_queue_exception
 from core.middlewares.redis_sessions import get_redis_table
 from core.models.matchmaking.matchmaking_auxilary_methods import find_user_in_queue_by_id
 from core.schemas.user_models import UserQueueModel
@@ -25,7 +24,7 @@ def add_user_to_queue(user: UserTable, subject: str) -> None:
     queue = get_redis_table(QUEUE)
     user_queue_model = create_user_queue_model(user, subject)
     if user_queue_model.dict() in queue:
-        raise HTTPException(status_code=403, detail='User already in queue')
+        raise user_already_in_queue_exception
     queue.append(user_queue_model.dict())
     redis.set(QUEUE, json.dumps(queue))
     redis.expire(QUEUE, datetime.timedelta(hours=5))
@@ -56,5 +55,7 @@ def leave_the_queue(user: UserTable) -> None:
     """
     queue = get_redis_table(QUEUE)
     user_queue = find_user_in_queue_by_id(user.id)
+    if not user_queue:
+        raise user_not_in_queue_exception
     queue.remove(user_queue)
     redis.set(QUEUE, json.dumps(queue))

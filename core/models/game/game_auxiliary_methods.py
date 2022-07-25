@@ -24,7 +24,9 @@ def find_user_in_game_by_id(user_id: int):
     :return: Dict[UserGameModel]
     """
     games = get_redis_game_table()
-    return games[str(user_id)]
+    if str(user_id) in games:
+        return games[str(user_id)]
+    return None
 
 
 def find_user_in_game_as_opponent(user_id: int):
@@ -92,8 +94,9 @@ def create_game_token(user: UserTable) -> str:
         (user that started matchmaking)
     :return: str (game token)
     """
-    is_user_in_game = find_user_in_game_as_opponent(user.id)
-    if is_user_in_game:
+    is_user_in_game_as_opponent = find_user_in_game_as_opponent(user.id)
+    is_user_in_game = find_user_in_game_by_id(user.id)
+    if is_user_in_game or is_user_in_game_as_opponent:
         return is_user_in_game['game_token']
     alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890' \
                '-=~`!@#$%^&*()_+:"|'
