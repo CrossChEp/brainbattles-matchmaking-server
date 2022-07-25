@@ -9,8 +9,8 @@ import random
 from fastapi import HTTPException
 
 from core.middlewares.redis_sessions import get_redis_game_table
-from core.models.matchmaking.matchmaking_auxilary_methods import find_task_by_subject, find_task_by_rank, \
-    get_random_element
+from core.models.matchmaking.matchmaking_auxilary_methods import find_task_by_subject, \
+    find_task_by_rank, get_random_element
 from core.models.tasks.tasks import get_tasks
 from core.schemas.user_models import UserGameModel
 from core.store.db_model import UserTable, TaskTable
@@ -99,8 +99,7 @@ def create_game_token(user: UserTable) -> str:
                '-=~`!@#$%^&*()_+:"|'
     token_size = random.randint(0, len(alphabet))
     token = ''
-    alphabet_list = [char for char in alphabet]
+    alphabet_list = list(alphabet)
     for i in range(token_size):
         token += alphabet_list[random.randint(0, len(alphabet) - 1)]
     return token
-

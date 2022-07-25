@@ -15,4 +15,3 @@ def get_tasks() -> List[TaskTable]:
     """
     session: Session = next(generate_session())
     return session.query(TaskTable).filter_by(state=OPEN).all()
-

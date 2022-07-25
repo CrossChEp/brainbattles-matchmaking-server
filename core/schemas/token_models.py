@@ -24,6 +24,7 @@ class Token(BaseModel):
     token_type: str
 
     class Config:
+        """Config class"""
         orm_mode = True
 
 

@@ -100,5 +100,3 @@ def check_ban_data(user: UserTable, session: Session) -> None:
             unban_user(user, session)
             return
         raise HTTPException(status_code=403, detail=f"You are banned till {user.ban_term}")
-
-

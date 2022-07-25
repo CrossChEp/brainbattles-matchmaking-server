@@ -5,11 +5,10 @@ redis table
 
 
 import random
-from typing import List, Dict
+from typing import List
 
 from core.configs.config import QUEUE, ranks
 from core.middlewares.redis_sessions import get_redis_table
-from core.schemas.user_models import UserQueueModel
 from core.store.db_model import UserTable, TaskTable
 
 
@@ -67,7 +66,7 @@ def get_available_ranks(available_rank: str) -> List[str]:
         (user rank)
     :return: List[str]
     """
-    ranks_list = [rank for rank in ranks.values()]
+    ranks_list = list(ranks.values())
     available_ranks = []
     for index, rank in enumerate(ranks_list):
         if rank == available_rank:
@@ -137,4 +136,3 @@ def find_task_by_rank(tasks: List[TaskTable], user: UserTable) -> List[TaskTable
         if task.rank in available_ranks:
             filtered_tasks.append(task)
     return filtered_tasks
-

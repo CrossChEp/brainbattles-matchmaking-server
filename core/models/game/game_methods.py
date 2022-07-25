@@ -8,9 +8,10 @@ from fastapi import HTTPException
 
 from core.configs.config import GAME, redis
 from core.middlewares.redis_sessions import get_redis_game_table
-from core.models.game.game_auxiliary_methods import create_user_game_model, get_game_task, create_game_token, \
-    find_user_in_game_by_id
-from core.models.matchmaking.matchmaking_auxilary_methods import find_user_in_queue_by_id, find_user_subject, \
+from core.models.game.game_auxiliary_methods import create_user_game_model,\
+    get_game_task, create_game_token, find_user_in_game_by_id
+from core.models.matchmaking.matchmaking_auxilary_methods import find_user_in_queue_by_id, \
+    find_user_subject, \
     find_opponents_by_subject, find_opponents_by_rank, get_random_element
 from core.schemas.user_models import UserGameModel
 from core.store.db_model import UserTable

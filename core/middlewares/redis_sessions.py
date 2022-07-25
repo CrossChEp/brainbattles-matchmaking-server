@@ -37,4 +37,3 @@ def get_redis_game_table():
         redis.set(GAME, json.dumps({}))
         r = json.loads(redis.get(GAME))
         return r
-

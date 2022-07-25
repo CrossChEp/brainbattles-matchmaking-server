@@ -10,6 +10,10 @@ session = sessionmaker(bind=engine)
 
 
 def generate_session():
+    """generates database session
+
+    :return: Session
+    """
     sess = session()
     try:
         yield sess
