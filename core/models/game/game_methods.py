@@ -7,6 +7,7 @@ import json
 from fastapi import HTTPException
 
 from core.configs.config import GAME, redis
+from core.exceptions.exceptions import user_not_in_queue_exception
 from core.middlewares.redis_sessions import get_redis_game_table
 from core.models.game.game_auxiliary_methods import create_user_game_model,\
     get_game_task, create_game_token, find_user_in_game_by_id
@@ -25,8 +26,10 @@ def add_user_to_game(user: UserTable) -> str:
         (user that started matchmaking)
     :return: str (game token)
     """
+    if find_user_in_game_by_id(user.id):
+        return create_game_token(user)
     if not find_user_in_queue_by_id(user.id):
-        raise HTTPException(status_code=403, detail='User not in queue')
+        raise user_not_in_queue_exception
     subject = find_user_subject(user.id)
     return user_game_adding(user, subject)
 
