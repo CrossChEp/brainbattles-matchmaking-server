@@ -20,7 +20,7 @@ from core.schemas.user_models import UserGameModel
 from core.store.db_model import UserTable, TaskTable
 
 
-def find_user_in_game_by_id(user_id: int):
+def find_user_game_token_by_id(user_id: int):
     """finds the data of game, stored by the input id
 
     :param user_id: int
@@ -64,7 +64,7 @@ def check_is_user_already_has_game(user: UserTable):
     games = get_redis_game_table()
     user_opponent = get_user_opponent(user.id)
     if user_opponent:
-        token = find_user_in_game_by_id(user_opponent.id)
+        token = find_user_game_token_by_id(user_opponent.id)
         task_id = games[token][str(user_opponent.id)]['task_id']
         user_game_model = create_user_game_model(user.id, user_opponent.id, task_id)
         return add_user_to_game_redis_table(user_game_model, token)
@@ -119,7 +119,7 @@ def create_game_token(user: UserTable) -> str:
         (user that started matchmaking)
     :return: str (game token)
     """
-    is_user_in_game = find_user_in_game_by_id(user.id)
+    is_user_in_game = find_user_game_token_by_id(user.id)
     if is_user_in_game:
         return is_user_in_game
     alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890' \
