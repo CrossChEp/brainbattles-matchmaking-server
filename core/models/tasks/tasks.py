@@ -1,4 +1,4 @@
-"""Module that contains all functions connected with tasks"""
+"""M odule that contains all functionsconnected with tasks"""
 from typing import List
 
 from sqlalchemy.orm import Session

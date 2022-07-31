@@ -44,7 +44,6 @@ class UserGameModel(BaseModel):
     user_id: int
     opponent_id: int
     task_id: int
-    game_token: str
 
     class Config:
         orm_mode = True
