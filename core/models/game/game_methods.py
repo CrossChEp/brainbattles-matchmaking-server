@@ -1,6 +1,5 @@
 """Module that contains all main functions connected with redis game table"""
 
-
 import datetime
 import json
 
@@ -9,11 +8,13 @@ from fastapi import HTTPException
 from core.configs.config import GAME, redis
 from core.exceptions.exceptions import user_not_in_queue_exception
 from core.middlewares.redis_sessions import get_redis_game_table
-from core.models.game.game_auxiliary_methods import create_user_game_model,\
-    get_game_task, create_game_token, find_user_in_game_by_id
+from core.models.game.game_auxiliary_methods import create_user_game_model, \
+    get_game_task, create_game_token, find_user_in_game_by_id, find_user_in_game_as_opponent, get_user_opponent, \
+    check_is_user_already_has_game, add_user_to_game_redis_table
 from core.models.matchmaking.matchmaking_auxilary_methods import find_user_in_queue_by_id, \
     find_user_subject, \
     find_opponents_by_subject, find_opponents_by_rank, get_random_element
+from core.models.users.users_methods import get_user_by_id
 from core.schemas.user_models import UserGameModel
 from core.store.db_model import UserTable
 
@@ -45,6 +46,9 @@ def user_game_adding(user: UserTable, subject: str) -> str:
     :return: str (game token)
     """
     while True:
+        check_user_game = check_is_user_already_has_game(user)
+        if check_user_game:
+            return check_user_game
         opponents = find_opponents_by_subject(user, subject)
         if not opponents:
             continue
@@ -54,24 +58,8 @@ def user_game_adding(user: UserTable, subject: str) -> str:
         opponent = get_random_element(opponents)
         task = get_game_task(subject, user)
         token = create_game_token(user)
-        user_game_model = create_user_game_model(user, opponent, task, token)
+        user_game_model = create_user_game_model(user.id, opponent['id'], task.id)
         return add_user_to_game_redis_table(user_game_model, token)
-
-
-def add_user_to_game_redis_table(user_game_model: UserGameModel, game_token: str) -> str:
-    """adds user to redis game table
-
-    :param user_game_model: UserGameModel
-        (game model of user that started matchmaking)
-    :param game_token: str
-        (game token)
-    :return: str (game token)
-    """
-    games = get_redis_game_table()
-    games[user_game_model.user_id] = user_game_model.dict()
-    redis.set(GAME, json.dumps(games))
-    redis.expire(GAME, datetime.timedelta(hours=3))
-    return game_token
 
 
 def leave_the_game(user: UserTable) -> str:

@@ -2,16 +2,20 @@
 redis table
 
 """
-
-
+import datetime
+import json
 import random
 
 from fastapi import HTTPException
+from sqlalchemy.orm import Session
 
+from core.configs.config import redis, GAME
+from core.middlewares.database_session import generate_session
 from core.middlewares.redis_sessions import get_redis_game_table
 from core.models.matchmaking.matchmaking_auxilary_methods import find_task_by_subject, \
     find_task_by_rank, get_random_element
 from core.models.tasks.tasks import get_tasks
+from core.models.users.users_methods import get_user_by_id
 from core.schemas.user_models import UserGameModel
 from core.store.db_model import UserTable, TaskTable
 
@@ -24,8 +28,9 @@ def find_user_in_game_by_id(user_id: int):
     :return: Dict[UserGameModel]
     """
     games = get_redis_game_table()
-    if str(user_id) in games:
-        return games[str(user_id)]
+    for token in games.keys():
+        if str(user_id) in games[token]:
+            return token
     return None
 
 
@@ -37,14 +42,35 @@ def find_user_in_game_as_opponent(user_id: int):
     :return: Dict[UserGameModel]
     """
     games = get_redis_game_table()
-    for user_games in games:
-        if games[user_games]['opponent_id'] == user_id:
-            return games[user_games]
+    for token in games:
+        for user_game in games[token]:
+            if games[token][user_game]['opponent_id'] == user_id:
+                return token
     return None
 
 
-def create_user_game_model(user: UserTable, opponent: dict, task: TaskTable,
-                           token: str) -> UserGameModel:
+def get_user_opponent(user_id: int):
+    games = get_redis_game_table()
+    session: Session = next(generate_session())
+    game_token = find_user_in_game_as_opponent(user_id)
+    if game_token:
+        all_user_ids_in_game = list(games[game_token].keys())
+        opponent = get_user_by_id(all_user_ids_in_game[0], session)
+        return opponent
+    return None
+
+
+def check_is_user_already_has_game(user: UserTable):
+    games = get_redis_game_table()
+    user_opponent = get_user_opponent(user.id)
+    if user_opponent:
+        token = find_user_in_game_by_id(user_opponent.id)
+        task_id = games[token][str(user_opponent.id)]['task_id']
+        user_game_model = create_user_game_model(user.id, user_opponent.id, task_id)
+        return add_user_to_game_redis_table(user_game_model, token)
+
+
+def create_user_game_model(user_id: int, opponent_id: int, task_id: int) -> UserGameModel:
     """creates the user game model
 
     :param user: UserTable
@@ -58,10 +84,9 @@ def create_user_game_model(user: UserTable, opponent: dict, task: TaskTable,
     :return: UserGameModel
     """
     game_model = UserGameModel(
-        user_id=user.id,
-        opponent_id=opponent['id'],
-        task_id=task.id,
-        game_token=token
+        user_id=user_id,
+        opponent_id=opponent_id,
+        task_id=task_id
     )
     return game_model
 
@@ -94,10 +119,9 @@ def create_game_token(user: UserTable) -> str:
         (user that started matchmaking)
     :return: str (game token)
     """
-    is_user_in_game_as_opponent = find_user_in_game_as_opponent(user.id)
     is_user_in_game = find_user_in_game_by_id(user.id)
-    if is_user_in_game or is_user_in_game_as_opponent:
-        return is_user_in_game['game_token']
+    if is_user_in_game:
+        return is_user_in_game
     alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz1234567890' \
                '-=~`!@#$%^&*()_+:"|'
     token_size = random.randint(0, len(alphabet))
@@ -106,3 +130,21 @@ def create_game_token(user: UserTable) -> str:
     for i in range(token_size):
         token += alphabet_list[random.randint(0, len(alphabet) - 1)]
     return token
+
+
+def add_user_to_game_redis_table(user_game_model: UserGameModel, game_token: str) -> str:
+    """adds user to redis game table
+
+    :param user_game_model: UserGameModel
+        (game model of user that started matchmaking)
+    :param game_token: str
+        (game token)
+    :return: str (game token)
+    """
+    games = get_redis_game_table()
+    if game_token not in games:
+        games[game_token] = {}
+    games[game_token][user_game_model.user_id] = user_game_model.dict()
+    redis.set(GAME, json.dumps(games))
+    redis.expire(GAME, datetime.timedelta(hours=3))
+    return game_token
