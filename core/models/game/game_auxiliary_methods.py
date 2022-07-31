@@ -49,7 +49,13 @@ def find_user_in_game_as_opponent(user_id: int):
     return None
 
 
-def get_user_opponent(user_id: int):
+def get_user_opponent(user_id: int) -> UserTable:
+    """searches the user's opponent and returns
+
+    :param user_id: int
+        (id of user)
+    :return: UserTable
+    """
     games = get_redis_game_table()
     session: Session = next(generate_session())
     game_token = find_user_in_game_as_opponent(user_id)
@@ -60,7 +66,14 @@ def get_user_opponent(user_id: int):
     return None
 
 
-def check_is_user_already_has_game(user: UserTable):
+def check_is_user_already_has_game(user: UserTable) -> str:
+    """checks is user already has game as opponent, and if yes,
+    adds user to this game and returns game token
+
+    :param user: UserTable
+        (user who searches the game)
+    :return: str
+    """
     games = get_redis_game_table()
     user_opponent = get_user_opponent(user.id)
     if user_opponent:
@@ -73,14 +86,12 @@ def check_is_user_already_has_game(user: UserTable):
 def create_user_game_model(user_id: int, opponent_id: int, task_id: int) -> UserGameModel:
     """creates the user game model
 
-    :param user: UserTable
-        (user, whose game model should be)
-    :param opponent: Dict
-        (opponent data of game)
-    :param task: TaskTable
-        (task, that was chosen in matchmaking)
-    :param token: str
-        (game token)
+    :param user_id: int
+        (id of user, whose game model should be)
+    :param opponent_id: int
+        (opponent id)
+    :param task_id: int
+        (id of task, that was chosen in matchmaking)
     :return: UserGameModel
     """
     game_model = UserGameModel(

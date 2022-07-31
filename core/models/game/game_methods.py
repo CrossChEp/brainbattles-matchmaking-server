@@ -59,7 +59,7 @@ def user_game_adding(user: UserTable, subject: str) -> str:
         return add_user_to_game_redis_table(user_game_model, token)
 
 
-def leave_the_game(user: UserTable) -> str:
+def leave_the_game(user: UserTable) -> None:
     """removes user from redis game table
 
     :param user: UserTable
